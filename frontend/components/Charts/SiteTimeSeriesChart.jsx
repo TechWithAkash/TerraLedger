@@ -13,6 +13,22 @@ export default function SiteTimeSeriesChart({ metrics = [] }) {
   const activeMetric =
     metrics.find((m) => m.metric_id === selectedMetricId) || metrics[0];
 
+  if (metrics.length === 0) {
+    return (
+      <div className="p-8 text-center bg-[#F9FAFB] rounded-xl border border-dashed border-[#D1D5DB]">
+        <p className="text-sm font-semibold text-[#0B1F16] mb-1">
+          No monitoring history yet
+        </p>
+        <p className="text-xs text-[#6B7280] max-w-sm mx-auto">
+          This site was just created, so there&apos;s nothing to chart yet.
+          Seeded demo sites carry 3 years of satellite and field-survey
+          observations - monitoring data for new sites is added through the
+          ingestion pipeline over time.
+        </p>
+      </div>
+    );
+  }
+
   if (
     !activeMetric ||
     !activeMetric.history ||

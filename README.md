@@ -31,6 +31,8 @@ Built specifically for the **Darukaa.Earth Full-Stack Developer Hackathon**.
 | **API Health Endpoint**      | [https://terraledger-api.onrender.com/health](https://terraledger-api.onrender.com/health)   | Returns `{"status": "ok"}`                      |
 | **Demo Reviewer Account**    | **Email:** `admin@darukaa.earth`<br/>**Password:** `demo1234`                                | Auto-filled with 1-click in the UI              |
 
+> **Cold start note:** the API is hosted on Render's free tier, which spins the container down after inactivity. The first request after a quiet period can take 30-50 seconds to respond; every request after that is fast. If the live demo looks unresponsive on first load, that's why — give it a moment.
+
 ---
 
 ## 🌿 What is TerraLedger?
@@ -177,6 +179,20 @@ erDiagram
 
 ---
 
+## 🌍 Data Sourcing Strategy
+
+The brief explicitly leaves dataset choice open and asks it to be documented — here's what's actually in the seed data (`backend/app/seed/seed_data.py`), honestly:
+
+| Layer                 | Source                                                                                                                                                                            | Real or synthetic                                                                                                          |
+| --------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------- |
+| **Site boundaries**   | Hand-placed polygons over real coordinates in the Sundarbans (West Bengal), Western Ghats, and Marathwada regions of India                                                        | Real coordinates, hand-digitized                                                                                           |
+| **Monitoring values** | Generated with a logistic recovery curve (restoration effect saturates over ~30 months) plus a monsoon-seasonality sine term                                                      | **Synthetic** — not pulled from a live satellite or field-survey API                                                       |
+| **Provenance labels** | Each record is tagged `satellite_derived` / `modelled` / `field_survey` with a realistic source name (e.g. "Sentinel-2 L2A", "Soil Core Sampling Batch 4") and a confidence score | Labels describe the _kind_ of source a real pipeline would use for that metric, not an actual API call made during seeding |
+
+**Why synthetic instead of a live Sentinel-2/GBIF pull:** building a real satellite-ingestion pipeline was out of scope for the challenge timeframe. A defensible synthetic generator with realistic growth dynamics (logistic saturation, not a straight line — vegetation recovery genuinely plateaus) and seasonal variance was judged more valuable than spending the time budget on live API integration for a demo dataset. The provenance/confidence fields exist specifically so the UI can demonstrate how a real MRV system would surface data quality — the mechanism is real even though these particular values are generated, not measured.
+
+---
+
 ## 🚀 Quick Start & Local Setup
 
 ### Option A: 1-Click Launch (Recommended)
@@ -286,6 +302,52 @@ All 6 automated unit tests pass:
 - Shapely geodesic area calculation tests
 - JWT token encryption and password hashing tests
 - Authentication login flow verification
+
+---
+
+## 🔄 CI/CD Pipeline
+
+GitHub Actions workflow: [`.github/workflows/ci.yml`](.github/workflows/ci.yml). Runs on every push and pull request to `main`, as two independent, parallel jobs:
+
+```mermaid
+flowchart LR
+    PUSH["push / PR to main"] --> BE["Backend job"]
+    PUSH --> FE["Frontend job"]
+
+    subgraph BE["Backend Lint & Tests"]
+        B1["uv sync"] --> B2["ruff format --check"]
+        B2 --> B3["ruff check"]
+        B3 --> B4["pytest -v"]
+    end
+
+    subgraph FE["Frontend Lint & Build"]
+        F1["npm ci (root + frontend)"] --> F2["prettier --check"]
+        F2 --> F3["next build"]
+    end
+```
+
+| Job          | What it checks                                                                                                                                                                                                                                    |
+| ------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **Backend**  | Installs with `uv`, checks Ruff formatting, lints with Ruff, runs the Pytest suite (overlap detection, area calculation, auth flow)                                                                                                               |
+| **Frontend** | Installs both the root and `frontend/` lockfiles (two are intentional — root covers Husky/lint-staged/commitlint tooling, `frontend/` covers the app itself), checks Prettier formatting, runs a full `next build` against the production API URL |
+
+**Deployment is separate from CI and not gated by it directly** — Vercel and Render each auto-deploy on push to `main` via their own native GitHub integrations, independent of this workflow. CI's job here is to catch a broken build or a failing test _before_ that push reaches either platform; it isn't wired as a required check that blocks the push itself. A tighter setup would add branch protection requiring the CI check to pass before merge — noted as a next step in Trade-offs below rather than claimed as already in place.
+
+---
+
+## ⚖️ Trade-offs and Decisions
+
+Honest trade-offs made building this, in the spirit of the brief's own scoring line for this:
+
+**No Alembic migrations — `Base.metadata.create_all()` on startup instead.** Simpler to reason about within the challenge timeframe: no migration files to keep in sync, schema just gets created if missing. The real cost: no migration history, no rollback path, no safe way to alter a live table with existing data. For a project past the demo stage, this would need Alembic before the first schema change against real data.
+
+**Bearer tokens in memory rather than httpOnly cookies.** The frontend (Vercel) and API (Render) are different origins, which makes cookie + CSRF configuration meaningfully more complex for a single-admin dashboard. Tokens held in memory (not `localStorage`) limit XSS exposure to the current tab session. A multi-tenant production system would move to httpOnly cookies with CSRF protection.
+
+**CORS wide open (`allow_origins=["*"]`) rather than an explicit allowlist.** Chosen to avoid fighting CORS while both platforms' preview/production URLs were still being finalized (this project went through several `.vercel.app` domain reassignments during development). The cost is real: any origin can call the API. Worth tightening to the exact production frontend URL before this is anything beyond a graded demo.
+
+**Free-tier hosting (Render + Vercel) over paid.** Free is the right call for a hackathon submission, but it comes with two real costs the reviewer should know about rather than discover: the API cold-starts after inactivity (~30-50s first request, noted above), and Render's free Postgres has a limited lifetime and can be suspended — both acceptable trade-offs for a graded demo, not for anything meant to stay always-on.
+
+**Synthetic monitoring data with realistic provenance labels, not a live satellite pipeline.** Covered in detail in the Data Sourcing section above — the honest version is that the growth dynamics are modelled, not measured, and the README says so rather than letting the provenance labels imply otherwise.
 
 ---
 

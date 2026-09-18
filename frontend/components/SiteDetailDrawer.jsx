@@ -163,66 +163,72 @@ export default function SiteDetailDrawer({ siteId, onClose, onSiteDeleted }) {
               <h3 className="text-xs font-bold uppercase tracking-wider text-[#6B7280] mb-3">
                 Key Ecological Indicators vs Baseline
               </h3>
-              <div className="grid grid-cols-2 gap-3">
-                {analytics?.metrics?.slice(0, 4).map((metric) => {
-                  const isPositive = (metric.delta_absolute || 0) > 0;
-                  return (
-                    <div
-                      key={metric.metric_id}
-                      className="p-3.5 bg-white border border-[#E5E7EB] rounded-xl shadow-xs"
-                    >
-                      <div className="flex items-center justify-between mb-1">
-                        <span className="text-xs font-semibold text-[#4B5563] truncate">
-                          {metric.label}
-                        </span>
-                        <span
-                          className={`text-[10px] font-bold px-1.5 py-0.5 rounded-full flex items-center gap-0.5 ${
-                            metric.trend === "improving"
-                              ? "bg-emerald-50 text-[rgb(0,146,69)] border border-emerald-200"
-                              : metric.trend === "declining"
-                                ? "bg-rose-50 text-rose-600 border border-rose-200"
-                                : "bg-gray-100 text-gray-600 border border-gray-200"
-                          }`}
-                        >
-                          {metric.trend === "improving" ? (
-                            <TrendingUp className="w-2.5 h-2.5" />
-                          ) : metric.trend === "declining" ? (
-                            <TrendingDown className="w-2.5 h-2.5" />
-                          ) : (
-                            <Minus className="w-2.5 h-2.5" />
-                          )}
-                          {metric.trend}
-                        </span>
-                      </div>
+              {!analytics?.metrics?.length ? (
+                <div className="p-4 text-center text-xs text-[#6B7280] bg-[#F9FAFB] rounded-xl border border-dashed border-[#D1D5DB]">
+                  No baseline readings recorded for this site yet.
+                </div>
+              ) : (
+                <div className="grid grid-cols-2 gap-3">
+                  {analytics?.metrics?.slice(0, 4).map((metric) => {
+                    const isPositive = (metric.delta_absolute || 0) > 0;
+                    return (
+                      <div
+                        key={metric.metric_id}
+                        className="p-3.5 bg-white border border-[#E5E7EB] rounded-xl shadow-xs"
+                      >
+                        <div className="flex items-center justify-between mb-1">
+                          <span className="text-xs font-semibold text-[#4B5563] truncate">
+                            {metric.label}
+                          </span>
+                          <span
+                            className={`text-[10px] font-bold px-1.5 py-0.5 rounded-full flex items-center gap-0.5 ${
+                              metric.trend === "improving"
+                                ? "bg-emerald-50 text-[rgb(0,146,69)] border border-emerald-200"
+                                : metric.trend === "declining"
+                                  ? "bg-rose-50 text-rose-600 border border-rose-200"
+                                  : "bg-gray-100 text-gray-600 border border-gray-200"
+                            }`}
+                          >
+                            {metric.trend === "improving" ? (
+                              <TrendingUp className="w-2.5 h-2.5" />
+                            ) : metric.trend === "declining" ? (
+                              <TrendingDown className="w-2.5 h-2.5" />
+                            ) : (
+                              <Minus className="w-2.5 h-2.5" />
+                            )}
+                            {metric.trend}
+                          </span>
+                        </div>
 
-                      <div className="flex items-baseline gap-2 mb-1">
-                        <span className="text-xl font-bold text-[#0B1F16] font-mono">
-                          {metric.latest_value}
-                        </span>
-                        <span className="text-[11px] text-[#6B7280]">
-                          {metric.unit}
-                        </span>
-                      </div>
+                        <div className="flex items-baseline gap-2 mb-1">
+                          <span className="text-xl font-bold text-[#0B1F16] font-mono">
+                            {metric.latest_value}
+                          </span>
+                          <span className="text-[11px] text-[#6B7280]">
+                            {metric.unit}
+                          </span>
+                        </div>
 
-                      <div className="flex items-center justify-between text-[11px] pt-1.5 border-t border-[#F3F4F6]">
-                        <span className="text-[#6B7280]">
-                          Baseline: {metric.baseline_value}
-                        </span>
-                        <span
-                          className={`font-semibold font-mono ${
-                            isPositive
-                              ? "text-[rgb(0,146,69)]"
-                              : "text-rose-600"
-                          }`}
-                        >
-                          {isPositive ? "+" : ""}
-                          {metric.delta_absolute} ({metric.delta_percent}%)
-                        </span>
+                        <div className="flex items-center justify-between text-[11px] pt-1.5 border-t border-[#F3F4F6]">
+                          <span className="text-[#6B7280]">
+                            Baseline: {metric.baseline_value}
+                          </span>
+                          <span
+                            className={`font-semibold font-mono ${
+                              isPositive
+                                ? "text-[rgb(0,146,69)]"
+                                : "text-rose-600"
+                            }`}
+                          >
+                            {isPositive ? "+" : ""}
+                            {metric.delta_absolute} ({metric.delta_percent}%)
+                          </span>
+                        </div>
                       </div>
-                    </div>
-                  );
-                })}
-              </div>
+                    );
+                  })}
+                </div>
+              )}
             </div>
 
             {/* Highcharts Historical Time-Series */}

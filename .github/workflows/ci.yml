@@ -65,4 +65,4 @@ jobs:
         working-directory: frontend
         run: npm run build
         env:
-          NEXT_PUBLIC_API_URL: https://darukaa-api.onrender.com/api/v1
+          NEXT_PUBLIC_API_URL: https://terraledger-api.onrender.com/api/v1
