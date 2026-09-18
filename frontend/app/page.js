@@ -1,13 +1,13 @@
 "use client";
 
 import React, { useEffect, useState, useCallback } from "react";
-import Navbar from "@/components/Navbar";
-import InteractiveMap from "@/components/Map/InteractiveMap";
-import SiteDetailDrawer from "@/components/SiteDetailDrawer";
-import NewProjectModal from "@/components/NewProjectModal";
-import NewSiteModal from "@/components/NewSiteModal";
-import AuthModal from "@/components/AuthModal";
-import { api } from "@/lib/api";
+import Navbar from "../components/Navbar";
+import InteractiveMap from "../components/Map/InteractiveMap";
+import SiteDetailDrawer from "../components/SiteDetailDrawer";
+import NewProjectModal from "../components/NewProjectModal";
+import NewSiteModal from "../components/NewSiteModal";
+import AuthModal from "../components/AuthModal";
+import { api } from "../lib/api";
 import { TreePine, AlertCircle, Sparkles, MapPin, Layers } from "lucide-react";
 
 export default function Dashboard() {

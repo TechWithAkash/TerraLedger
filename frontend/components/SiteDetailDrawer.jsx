@@ -13,7 +13,7 @@ import {
   ShieldCheck,
   Loader2,
 } from "lucide-react";
-import { api } from "@/lib/api";
+import { api } from "../lib/api";
 import SiteTimeSeriesChart from "./Charts/SiteTimeSeriesChart";
 
 export default function SiteDetailDrawer({ siteId, onClose, onSiteDeleted }) {
