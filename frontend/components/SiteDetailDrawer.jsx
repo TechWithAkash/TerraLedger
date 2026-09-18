@@ -13,8 +13,20 @@ import {
   ShieldCheck,
   Loader2,
 } from "lucide-react";
+import dynamic from "next/dynamic";
 import { api } from "../lib/api";
-import SiteTimeSeriesChart from "./Charts/SiteTimeSeriesChart";
+
+const SiteTimeSeriesChart = dynamic(
+  () => import("./Charts/SiteTimeSeriesChart"),
+  {
+    ssr: false,
+    loading: () => (
+      <div className="h-64 flex items-center justify-center bg-[#F9FAFB] rounded-xl text-xs text-[#6B7280]">
+        Loading MRV Time-Series...
+      </div>
+    ),
+  },
+);
 
 export default function SiteDetailDrawer({ siteId, onClose, onSiteDeleted }) {
   const [loading, setLoading] = useState(true);

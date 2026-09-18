@@ -1,13 +1,28 @@
 "use client";
 
 import React, { useEffect, useState, useCallback } from "react";
+import dynamic from "next/dynamic";
 import Navbar from "../components/Navbar";
-import InteractiveMap from "../components/Map/InteractiveMap";
 import SiteDetailDrawer from "../components/SiteDetailDrawer";
 import NewProjectModal from "../components/NewProjectModal";
 import NewSiteModal from "../components/NewSiteModal";
 import AuthModal from "../components/AuthModal";
 import { api } from "../lib/api";
+
+const InteractiveMap = dynamic(
+  () => import("../components/Map/InteractiveMap"),
+  {
+    ssr: false,
+    loading: () => (
+      <div className="w-full h-full flex items-center justify-center bg-[#0B1F16] text-white">
+        <div className="flex items-center gap-3">
+          <div className="w-4 h-4 border-2 border-[rgb(0,146,69)] border-t-transparent rounded-full animate-spin" />
+          <span className="text-sm font-medium">Loading Map Engine...</span>
+        </div>
+      </div>
+    ),
+  },
+);
 import { TreePine, AlertCircle, Sparkles, MapPin, Layers } from "lucide-react";
 
 export default function Dashboard() {
