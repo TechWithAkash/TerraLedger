@@ -104,14 +104,11 @@ async def create_site(
     area_ha = GeometryService.calculate_area_hectares(polygon)
     centroid = GeometryService.calculate_centroid(polygon)
 
-    wkb_boundary = GeometryService.polygon_to_wkb(polygon)
-    wkb_centroid = GeometryService.polygon_to_wkb(centroid)
-
     site = Site(
         project_id=project_id,
         name=payload.name,
-        boundary=wkb_boundary,
-        centroid=wkb_centroid,
+        boundary=payload.boundary,
+        centroid=mapping(centroid),
         area_hectares=area_ha,
         baseline_date=payload.baseline_date,
         land_cover_type=payload.land_cover_type,

@@ -1,8 +1,8 @@
 import uuid
 from datetime import UTC, date, datetime
+from typing import Any
 
-from geoalchemy2 import Geometry
-from sqlalchemy import Date, DateTime, Float, ForeignKey, String, Text
+from sqlalchemy import JSON, Date, DateTime, Float, ForeignKey, String, Text
 from sqlalchemy.dialects.postgresql import UUID
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
@@ -20,14 +20,17 @@ class Site(Base):
         index=True,
     )
     name: Mapped[str] = mapped_column(String(255), nullable=False)
-    boundary = mapped_column(Geometry("POLYGON", srid=4326), nullable=False)
+    # GeoJSON geometry stored as structured JSON (compatible with PostGIS ST_GeomFromGeoJSON)
+    boundary: Mapped[dict[str, Any]] = mapped_column(JSON, nullable=False)
+    centroid: Mapped[dict[str, Any] | None] = mapped_column(JSON, nullable=True)
     area_hectares: Mapped[float | None] = mapped_column(Float, nullable=True)
-    centroid = mapped_column(Geometry("POINT", srid=4326), nullable=True)
     baseline_date: Mapped[date | None] = mapped_column(Date, nullable=True)
     land_cover_type: Mapped[str | None] = mapped_column(String(100), nullable=True)
     notes: Mapped[str | None] = mapped_column(Text, nullable=True)
     created_at: Mapped[datetime] = mapped_column(
-        DateTime(timezone=True), default=lambda: datetime.now(UTC), nullable=False
+        DateTime(timezone=True),
+        default=lambda: datetime.now(UTC),
+        nullable=False,
     )
     updated_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True),

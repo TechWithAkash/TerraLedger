@@ -2,12 +2,12 @@ import asyncio
 import math
 from datetime import date, timedelta
 
-from shapely.geometry import Polygon
+from shapely.geometry import Polygon, mapping
 from sqlalchemy import select
 
 from app.core.security import get_password_hash
 from app.database import AsyncSessionLocal, Base, engine
-from app.models.monitoring import MonitoringRecord
+from app.models.monitoring import MetricDefinition, MonitoringRecord
 from app.models.project import Project
 from app.models.site import Site
 from app.models.user import User
@@ -34,6 +34,71 @@ async def run_seed():
             await session.commit()
             await session.refresh(user)
             print("Created demo admin: admin@darukaa.earth")
+
+        # 1.5 Ensure Metric Definitions are present
+        default_metrics = [
+            MetricDefinition(
+                id="canopy_cover",
+                label="Canopy Cover",
+                unit="%",
+                category="biophysical",
+                higher_is_better=True,
+                description="Canopy Cover %",
+                display_order=1,
+            ),
+            MetricDefinition(
+                id="ndvi_mean",
+                label="Mean NDVI",
+                unit="index",
+                category="biophysical",
+                higher_is_better=True,
+                description="Normalized Difference Vegetation Index",
+                display_order=2,
+            ),
+            MetricDefinition(
+                id="carbon_stock",
+                label="Above-ground Carbon Stock",
+                unit="tCO2e/ha",
+                category="carbon",
+                higher_is_better=True,
+                description="Biomass Carbon",
+                display_order=3,
+            ),
+            MetricDefinition(
+                id="soil_organic_carbon",
+                label="Soil Organic Carbon",
+                unit="%",
+                category="carbon",
+                higher_is_better=True,
+                description="Soil Carbon",
+                display_order=4,
+            ),
+            MetricDefinition(
+                id="species_richness",
+                label="Species Richness",
+                unit="species",
+                category="biodiversity",
+                higher_is_better=True,
+                description="Species Count",
+                display_order=5,
+            ),
+            MetricDefinition(
+                id="habitat_intactness",
+                label="Habitat Intactness",
+                unit="index",
+                category="biodiversity",
+                higher_is_better=True,
+                description="Intactness Index",
+                display_order=6,
+            ),
+        ]
+        for m in default_metrics:
+            m_chk = await session.execute(
+                select(MetricDefinition).where(MetricDefinition.id == m.id)
+            )
+            if not m_chk.scalars().first():
+                session.add(m)
+        await session.commit()
 
         # 2. Check or Create Projects
         projects_data = [
@@ -147,14 +212,12 @@ async def run_seed():
                 polygon = Polygon(s_data["coords"])
                 area_ha = GeometryService.calculate_area_hectares(polygon)
                 centroid = GeometryService.calculate_centroid(polygon)
-                wkb_b = GeometryService.polygon_to_wkb(polygon)
-                wkb_c = GeometryService.polygon_to_wkb(centroid)
 
                 site = Site(
                     project_id=p.id,
                     name=s_data["name"],
-                    boundary=wkb_b,
-                    centroid=wkb_c,
+                    boundary=mapping(polygon),
+                    centroid=mapping(centroid),
                     area_hectares=area_ha,
                     baseline_date=s_data["baseline_date"],
                     land_cover_type=s_data["land_cover_type"],

@@ -2,8 +2,6 @@ import math
 import uuid
 from typing import Any
 
-from geoalchemy2.elements import WKBElement
-from geoalchemy2.shape import from_shape, to_shape
 from shapely.geometry import Point, Polygon, mapping, shape
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -96,15 +94,21 @@ class GeometryService:
         rows = result.all()
 
         for site, project_name in rows:
-            if site.boundary is None:
+            if not site.boundary:
                 continue
             try:
-                existing_geom = to_shape(site.boundary)
+                if isinstance(site.boundary, dict):
+                    existing_geom = shape(site.boundary)
+                else:
+                    from geoalchemy2.shape import to_shape
+
+                    existing_geom = to_shape(site.boundary)
+
                 if new_polygon.intersects(existing_geom):
                     intersection = new_polygon.intersection(existing_geom)
                     if not intersection.is_empty and isinstance(intersection, Polygon):
                         overlap_ha = cls.calculate_area_hectares(intersection)
-                        # Tolerance: > 0.01 hectares (100 square meters)
+                        # Tolerance: >= 0.01 hectares (100 square meters)
                         if overlap_ha >= 0.01:
                             conflicts.append(
                                 ConflictInfo(
@@ -122,15 +126,15 @@ class GeometryService:
         return conflicts
 
     @staticmethod
-    def polygon_to_wkb(polygon: Polygon) -> WKBElement:
-        return from_shape(polygon, srid=4326)
-
-    @staticmethod
-    def wkb_to_geojson(wkb_element) -> dict[str, Any]:
-        if wkb_element is None:
+    def wkb_to_geojson(element) -> dict[str, Any]:
+        if element is None:
             return {}
+        if isinstance(element, dict):
+            return element
         try:
-            geom = to_shape(wkb_element)
+            from geoalchemy2.shape import to_shape
+
+            geom = to_shape(element)
             return mapping(geom)
         except Exception:
             return {}
