@@ -26,13 +26,14 @@ export default function SiteDetailDrawer({ siteId, onClose, onSiteDeleted }) {
     if (!siteId) return;
 
     let isMounted = true;
-    setLoading(true);
-    setError(null);
 
     api
       .getSiteAnalytics(siteId)
       .then((data) => {
-        if (isMounted) setAnalytics(data);
+        if (isMounted) {
+          setError(null);
+          setAnalytics(data);
+        }
       })
       .catch((err) => {
         if (isMounted) setError(err.message || "Failed to load site analytics");

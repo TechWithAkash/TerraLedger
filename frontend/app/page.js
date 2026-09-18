@@ -29,6 +29,29 @@ export default function Dashboard() {
   const [isNewSiteOpen, setIsNewSiteOpen] = useState(false);
   const [isAuthOpen, setIsAuthOpen] = useState(false);
 
+  const loadProjects = useCallback(async () => {
+    try {
+      const data = await api.getProjects();
+      setProjects(data || []);
+    } catch (err) {
+      console.warn("Could not fetch projects:", err.message || err);
+    }
+  }, []);
+
+  const loadSites = useCallback(async (projId = null) => {
+    try {
+      let geojson;
+      if (projId) {
+        geojson = await api.getProjectSitesGeoJSON(projId);
+      } else {
+        geojson = await api.getAllSitesGeoJSON();
+      }
+      setSitesGeoJSON(geojson || { type: "FeatureCollection", features: [] });
+    } catch (err) {
+      console.warn("Could not fetch sites GeoJSON:", err);
+    }
+  }, []);
+
   // Initial user check and projects loading
   useEffect(() => {
     const initSession = async () => {
@@ -54,30 +77,7 @@ export default function Dashboard() {
     };
 
     initSession();
-  }, []);
-
-  const loadProjects = async () => {
-    try {
-      const data = await api.getProjects();
-      setProjects(data || []);
-    } catch (err) {
-      console.warn("Could not fetch projects:", err.message || err);
-    }
-  };
-
-  const loadSites = useCallback(async (projId = null) => {
-    try {
-      let geojson;
-      if (projId) {
-        geojson = await api.getProjectSitesGeoJSON(projId);
-      } else {
-        geojson = await api.getAllSitesGeoJSON();
-      }
-      setSitesGeoJSON(geojson || { type: "FeatureCollection", features: [] });
-    } catch (err) {
-      console.warn("Could not fetch sites GeoJSON:", err);
-    }
-  }, []);
+  }, [loadProjects, loadSites]);
 
   // When selected project changes, refresh site polygons
   const handleSelectProject = (project) => {
