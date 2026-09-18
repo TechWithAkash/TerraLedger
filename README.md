@@ -14,7 +14,7 @@
 
 Built specifically for the **Darukaa.Earth Full-Stack Developer Hackathon**.
 
-[Live Frontend Demo](https://terraledger.vercel.app) • [Backend API (Render)](https://terraledger-api.onrender.com) • [Interactive API Docs](https://terraledger-api.onrender.com/docs) • [GitHub Repository](https://github.com/TechWithAkash/TerraLedger)
+[Live Frontend Demo](https://terra-ledger-sooty.vercel.app/) • [Backend API (Render)](https://terraledger-api.onrender.com) • [Interactive API Docs](https://terraledger-api.onrender.com/docs) • [GitHub Repository](https://github.com/TechWithAkash/TerraLedger)
 
 </div>
 
@@ -24,6 +24,7 @@ Built specifically for the **Darukaa.Earth Full-Stack Developer Hackathon**.
 
 | Resource                     | URL / Details                                                                                | Notes                                           |
 | :--------------------------- | :------------------------------------------------------------------------------------------- | :---------------------------------------------- |
+| **Live Frontend Demo**       | [https://terra-ledger-sooty.vercel.app/](https://terra-ledger-sooty.vercel.app/)             | Production Dashboard Deployed on Vercel         |
 | **GitHub Repository**        | [https://github.com/TechWithAkash/TerraLedger](https://github.com/TechWithAkash/TerraLedger) | Public source code with full Git commit history |
 | **Live Backend API**         | [https://terraledger-api.onrender.com](https://terraledger-api.onrender.com)                 | Deployed on Render (FastAPI + AsyncPG)          |
 | **Interactive Swagger Docs** | [https://terraledger-api.onrender.com/docs](https://terraledger-api.onrender.com/docs)       | Test every endpoint directly in browser         |
@@ -246,7 +247,7 @@ DATABASE_URL=postgresql+asyncpg://postgres:postgres@localhost:5432/darukaa
 SECRET_KEY=darukaa_earth_nature_intelligence_secret_key_2026
 ALGORITHM=HS256
 ACCESS_TOKEN_EXPIRE_MINUTES=1440
-CORS_ORIGINS=["http://localhost:3000","https://terraledger.vercel.app"]
+CORS_ORIGINS=["http://localhost:3000","https://terra-ledger-sooty.vercel.app"]
 ```
 
 ### Frontend (`frontend/.env.local`)
