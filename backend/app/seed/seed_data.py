@@ -16,8 +16,12 @@ from app.services.geometry import GeometryService
 
 async def run_seed():
     print("Starting database seeding...")
-    async with engine.begin() as conn:
-        await conn.run_sync(Base.metadata.create_all)
+    try:
+        async with engine.begin() as conn:
+            await conn.run_sync(Base.metadata.create_all)
+    except Exception as e:
+        print(f"Database connection or schema creation skipped: {e}")
+        return
 
     async with AsyncSessionLocal() as session:
         # 1. Check or Create Demo User

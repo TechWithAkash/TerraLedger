@@ -26,5 +26,5 @@ EXPOSE 8000
 
 ENV PATH="/app/.venv/bin:$PATH"
 
-# Run migrations and start uvicorn
-CMD ["sh", "-c", "uv run python -m app.seed.seed_data && uv run uvicorn app.main:app --host 0.0.0.0 --port ${PORT:-8000}"]
+# Run seed and start uvicorn
+CMD ["sh", "-c", "uv run python -m app.seed.seed_data || true; exec uv run uvicorn app.main:app --host 0.0.0.0 --port ${PORT:-8000}"]
