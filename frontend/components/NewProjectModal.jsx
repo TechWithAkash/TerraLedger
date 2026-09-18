@@ -3,7 +3,12 @@
 import React, { useState } from "react";
 import { X, FolderPlus, Loader2, TreePine } from "lucide-react";
 
-export default function NewProjectModal({ isOpen, onClose, onProjectCreated }) {
+export default function NewProjectModal({
+  isOpen,
+  onClose,
+  onProjectCreated,
+  infoMessage,
+}) {
   const [name, setName] = useState("");
   const [description, setDescription] = useState("");
   const [projectType, setProjectType] = useState("agroforestry");
@@ -69,6 +74,11 @@ export default function NewProjectModal({ isOpen, onClose, onProjectCreated }) {
 
         {/* Form Body */}
         <form onSubmit={handleSubmit} className="p-5 space-y-4">
+          {!error && infoMessage && (
+            <div className="p-3 bg-emerald-50 border border-emerald-200 text-emerald-800 text-xs rounded-xl">
+              {infoMessage}
+            </div>
+          )}
           {error && (
             <div className="p-3 bg-rose-50 border border-rose-200 text-rose-700 text-xs rounded-xl">
               {error}

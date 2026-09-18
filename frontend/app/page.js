@@ -41,6 +41,7 @@ export default function Dashboard() {
 
   // Modals
   const [isNewProjectOpen, setIsNewProjectOpen] = useState(false);
+  const [newProjectInfoMessage, setNewProjectInfoMessage] = useState(null);
   const [isNewSiteOpen, setIsNewSiteOpen] = useState(false);
   const [isAuthOpen, setIsAuthOpen] = useState(false);
 
@@ -108,7 +109,10 @@ export default function Dashboard() {
     const targetProjId = selectedProject?.id || projects[0]?.id;
 
     if (!targetProjId) {
-      alert("Please create or select a project before adding site parcels.");
+      setNewProjectInfoMessage(
+        "You need a project before adding site parcels. Create one below, then draw your site again.",
+      );
+      setIsNewProjectOpen(true);
       return;
     }
 
@@ -187,7 +191,10 @@ export default function Dashboard() {
         projects={projects}
         selectedProject={selectedProject}
         onSelectProject={handleSelectProject}
-        onOpenNewProject={() => setIsNewProjectOpen(true)}
+        onOpenNewProject={() => {
+          setNewProjectInfoMessage(null);
+          setIsNewProjectOpen(true);
+        }}
         user={user}
         onOpenAuth={() => setIsAuthOpen(true)}
         onLogout={handleLogout}
@@ -219,8 +226,12 @@ export default function Dashboard() {
       {/* Modals */}
       <NewProjectModal
         isOpen={isNewProjectOpen}
-        onClose={() => setIsNewProjectOpen(false)}
+        onClose={() => {
+          setIsNewProjectOpen(false);
+          setNewProjectInfoMessage(null);
+        }}
         onProjectCreated={handleCreateProject}
+        infoMessage={newProjectInfoMessage}
       />
 
       <NewSiteModal

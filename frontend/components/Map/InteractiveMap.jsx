@@ -190,6 +190,12 @@ export default function InteractiveMap({
     const handleDrawCreate = (e) => {
       if (e.features && e.features.length > 0) {
         const feature = e.features[0];
+        // Capture the geometry, then immediately clear Draw's internal state.
+        // Otherwise the just-finished polygon stays selected/editable on the
+        // map (draggable vertices) with no visual cue, and the next click
+        // the user makes either reshapes it or pans the map instead of
+        // starting a fresh draw - looking like "the map just moves".
+        drawRef.current?.deleteAll();
         if (onPolygonCreated) {
           onPolygonCreated(feature.geometry);
         }
