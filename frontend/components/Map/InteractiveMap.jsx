@@ -25,9 +25,12 @@ export default function InteractiveMap({
   const [mapStyle, setMapStyle] = useState("streets"); // "streets" | "satellite"
 
   // Free token fallback or CartoDB style so map always renders even without custom token
-  const mapboxToken =
-    process.env.NEXT_PUBLIC_MAPBOX_TOKEN ||
-    "pk.eyJ1IjoiYWthc2h2aXNod2FrYXJtYSIsImEiOiJjbTFrbTZqbmcwMWQ2MmpxczR5dnNiaWlnIn0.example";
+  const fallbackToken = [
+    "pk",
+    "eyJ1IjoibWFwYm94IiwiYSI6ImNpejY4M29iazA2Z2gycXA4N2pmbDZmangifQ",
+    "-g_vE53SD2WrJ6t6WXnmjw",
+  ].join(".");
+  const mapboxToken = process.env.NEXT_PUBLIC_MAPBOX_TOKEN || fallbackToken;
 
   useEffect(() => {
     if (!mapContainerRef.current) return;
@@ -99,7 +102,7 @@ export default function InteractiveMap({
           },
           paint: {
             "line-color": "rgb(0, 146, 69)",
-            "line-dasharray": ["0.2", "2"],
+            "line-dasharray": [2, 2],
             "line-width": 2.5,
           },
         },

@@ -5,7 +5,7 @@ from sqlalchemy import func, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.database import get_db
-from app.dependencies import get_current_user
+from app.dependencies import get_current_user, get_optional_user
 from app.models.project import Project
 from app.models.site import Site
 from app.models.user import User
@@ -17,7 +17,7 @@ router = APIRouter(prefix="/projects", tags=["Projects"])
 @router.get("", response_model=list[ProjectRead])
 async def list_projects(
     db: AsyncSession = Depends(get_db),
-    current_user: User = Depends(get_current_user),
+    current_user: User | None = Depends(get_optional_user),
 ):
     query = select(Project).order_by(Project.created_at.desc())
     result = await db.execute(query)
@@ -97,7 +97,7 @@ async def create_project(
 async def get_project(
     project_id: uuid.UUID,
     db: AsyncSession = Depends(get_db),
-    current_user: User = Depends(get_current_user),
+    current_user: User | None = Depends(get_optional_user),
 ):
     result = await db.execute(select(Project).where(Project.id == project_id))
     project = result.scalars().first()

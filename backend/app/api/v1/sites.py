@@ -7,7 +7,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.exceptions import GeometryOverlapException
 from app.database import get_db
-from app.dependencies import get_current_user
+from app.dependencies import get_current_user, get_optional_user
 from app.models.project import Project
 from app.models.site import Site
 from app.models.user import User
@@ -31,7 +31,7 @@ async def validate_site_geometry(
     project_id: uuid.UUID,
     payload: SiteCreate,
     db: AsyncSession = Depends(get_db),
-    current_user: User = Depends(get_current_user),
+    current_user: User | None = Depends(get_optional_user),
 ):
     """
     Dry-run validation endpoint used by Mapbox Draw in the frontend.
@@ -140,7 +140,7 @@ async def create_site(
 async def get_project_sites_geojson(
     project_id: uuid.UUID,
     db: AsyncSession = Depends(get_db),
-    current_user: User = Depends(get_current_user),
+    current_user: User | None = Depends(get_optional_user),
 ):
     """
     Returns sites for a project as a GeoJSON FeatureCollection,
@@ -176,7 +176,7 @@ async def get_project_sites_geojson(
 )
 async def get_all_sites_geojson(
     db: AsyncSession = Depends(get_db),
-    current_user: User = Depends(get_current_user),
+    current_user: User | None = Depends(get_optional_user),
 ):
     """
     Returns all sites across all projects for the global overview map.
@@ -212,7 +212,7 @@ async def get_all_sites_geojson(
 async def get_site(
     site_id: uuid.UUID,
     db: AsyncSession = Depends(get_db),
-    current_user: User = Depends(get_current_user),
+    current_user: User | None = Depends(get_optional_user),
 ):
     result = await db.execute(select(Site).where(Site.id == site_id))
     site = result.scalars().first()

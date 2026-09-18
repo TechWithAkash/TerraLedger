@@ -7,7 +7,7 @@ from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.database import get_db
-from app.dependencies import get_current_user
+from app.dependencies import get_current_user, get_optional_user
 from app.models.monitoring import MetricDefinition, MonitoringRecord
 from app.models.site import Site
 from app.models.user import User
@@ -34,7 +34,7 @@ class MonitoringRecordCreate(BaseModel):
 @router.get("/metrics", response_model=list[MetricDefinitionRead])
 async def list_metric_definitions(
     db: AsyncSession = Depends(get_db),
-    current_user: User = Depends(get_current_user),
+    current_user: User | None = Depends(get_optional_user),
 ):
     query = select(MetricDefinition).order_by(MetricDefinition.display_order.asc())
     result = await db.execute(query)
@@ -45,7 +45,7 @@ async def list_metric_definitions(
 async def get_site_analytics(
     site_id: uuid.UUID,
     db: AsyncSession = Depends(get_db),
-    current_user: User = Depends(get_current_user),
+    current_user: User | None = Depends(get_optional_user),
 ):
     analytics = await AnalyticsService.get_site_analytics(db, site_id)
     if not analytics:

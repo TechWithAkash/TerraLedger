@@ -41,3 +41,27 @@ async def get_current_user(
     if not user.is_active:
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Inactive user")
     return user
+
+
+oauth2_scheme_optional = OAuth2PasswordBearer(tokenUrl="/api/v1/auth/login", auto_error=False)
+
+
+async def get_optional_user(
+    token: Annotated[str | None, Depends(oauth2_scheme_optional)],
+    db: Annotated[AsyncSession, Depends(get_db)],
+) -> User | None:
+    if not token:
+        return None
+    payload = decode_access_token(token)
+    if payload is None:
+        return None
+    user_id_str: str | None = payload.get("sub")
+    if not user_id_str:
+        return None
+
+    try:
+        user_uuid = uuid.UUID(user_id_str)
+        result = await db.execute(select(User).where(User.id == user_uuid))
+        return result.scalars().first()
+    except Exception:
+        return None

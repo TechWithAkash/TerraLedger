@@ -15,13 +15,16 @@ from app.models.monitoring import MetricDefinition
 async def lifespan(app: FastAPI):
     # Ensure tables are created on startup (or via migrations)
     try:
-        async with engine.begin() as conn:
-            # Enable PostGIS extension if running on PostgreSQL
-            if "postgresql" in settings.DATABASE_URL:
-                import contextlib
-
-                with contextlib.suppress(Exception):
+        # Attempt enabling PostGIS in an isolated connection if running on PostgreSQL
+        if "postgresql" in settings.DATABASE_URL:
+            try:
+                async with engine.connect() as conn:
+                    await conn.execution_options(isolation_level="AUTOCOMMIT")
                     await conn.execute(text("CREATE EXTENSION IF NOT EXISTS postgis;"))
+            except Exception:
+                pass
+
+        async with engine.begin() as conn:
             await conn.run_sync(Base.metadata.create_all)
 
         # Seed standard metric definitions if not present
