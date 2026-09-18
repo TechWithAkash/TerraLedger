@@ -1,172 +1,306 @@
-# Darukaa.Earth — Full-Stack Geospatial MRV Platform
+# TerraLedger — Nature Intelligence & MRV Geospatial Platform
 
-> Built for the **Darukaa.Earth Full-Stack Developer Hackathon Challenge**.  
-> An administrator dashboard for managing and visualizing carbon and biodiversity portfolios across India.
+<div align="center">
+
+[![CI Pipeline](https://github.com/TechWithAkash/TerraLedger/actions/workflows/ci.yml/badge.svg)](https://github.com/TechWithAkash/TerraLedger/actions)
+![FastAPI](https://img.shields.io/badge/Backend-FastAPI%200.115-009688?logo=fastapi)
+![Next.js](https://img.shields.io/badge/Frontend-Next.js%2016-black?logo=next.js)
+![PostgreSQL](https://img.shields.io/badge/Database-PostgreSQL%20%2B%20PostGIS-336791?logo=postgresql)
+![Mapbox](https://img.shields.io/badge/Mapping-Mapbox%20GL%20JS-blue?logo=mapbox)
+![Highcharts](https://img.shields.io/badge/Analytics-Highcharts-purple?logo=highcharts)
+![Code Style](https://img.shields.io/badge/Code%20Style-Ruff%20%7C%20Prettier-green)
+
+**Full-Stack Geospatial Data Analytics Platform for Carbon and Biodiversity Monitoring, Reporting & Verification (MRV)**
+
+Built specifically for the **Darukaa.Earth Full-Stack Developer Hackathon**.
+
+[Live Frontend Demo](https://terraledger.vercel.app) • [Backend API (Render)](https://terraledger-api.onrender.com) • [Interactive API Docs](https://terraledger-api.onrender.com/docs) • [GitHub Repository](https://github.com/TechWithAkash/TerraLedger)
+
+</div>
 
 ---
 
-## 1. High-Level Architecture
+## 📌 Submission Quick Reference & Live Links
 
-The platform follows a clean decoupled client-server architecture matching Darukaa's production requirements:
+| Resource                     | URL / Details                                                                                | Notes                                           |
+| :--------------------------- | :------------------------------------------------------------------------------------------- | :---------------------------------------------- |
+| **GitHub Repository**        | [https://github.com/TechWithAkash/TerraLedger](https://github.com/TechWithAkash/TerraLedger) | Public source code with full Git commit history |
+| **Live Backend API**         | [https://terraledger-api.onrender.com](https://terraledger-api.onrender.com)                 | Deployed on Render (FastAPI + AsyncPG)          |
+| **Interactive Swagger Docs** | [https://terraledger-api.onrender.com/docs](https://terraledger-api.onrender.com/docs)       | Test every endpoint directly in browser         |
+| **API Health Endpoint**      | [https://terraledger-api.onrender.com/health](https://terraledger-api.onrender.com/health)   | Returns `{"status": "ok"}`                      |
+| **Demo Reviewer Account**    | **Email:** `admin@darukaa.earth`<br/>**Password:** `demo1234`                                | Auto-filled with 1-click in the UI              |
+
+---
+
+## 🌿 What is TerraLedger?
+
+**TerraLedger** is a full-stack nature intelligence and MRV (Monitoring, Reporting, and Verification) dashboard designed for carbon project developers, ecological auditors, and registries.
+
+It solves three critical challenges in nature-based carbon and biodiversity projects:
+
+1. **Accurate Parcel Delineation:** Draw, digitize, and calculate geodesic areas (in hectares) directly on satellite/vector maps.
+2. **Double-Counting Prevention (Core Rubric Differentiator):** Automatically prevents fraudulent or overlapping land registration using real-time spatial intersection calculations (`ST_Intersects`) with a 100 m² tolerance.
+3. **Data Provenance & MRV Verification:** Interactive time-series tracking of key ecological indicators (Canopy Cover, NDVI, Carbon Stock, Soil Carbon, Species Richness) comparing current status against pre-restoration baselines with clear data origin markers (Satellite, Field Survey, Modelled).
+
+---
+
+## 🎨 Visual Identity & Design System
+
+The platform strictly implements Darukaa's official branding and visual design tokens:
+
+- **Primary Brand Nature Green:** `rgb(0, 146, 69)` / `#009245`
+- **Deep Forest Dark:** `#0B1F16`
+- **Neutral Background:** `#F9FAFB` and `#FFFFFF`
+- **Typography:** **Manrope** for headings and interface copy, **JetBrains Mono** for numerical figures and coordinates.
+
+---
+
+## 🏛️ High-Level System Architecture
 
 ```mermaid
 flowchart TB
-    subgraph CLIENT["Frontend (Next.js / React 19)"]
-        UI["Darukaa Design System UI<br/>(Manrope, JetBrains Mono, Nature Green)"]
-        MAP["Mapbox GL JS + MapboxDraw<br/>(Polygon drawing, Live area calculation)"]
-        CHART["Highcharts Data Visualization<br/>(Time-series, Baselines, Provenance tooltips)"]
+    subgraph CLIENT["Frontend (Next.js 16 / React 19)"]
+        UI["Darukaa Design System UI<br/>(Tailwind CSS + Lucide Icons)"]
+        MAP["Interactive Geospatial Map<br/>(Mapbox GL JS + Mapbox Draw)"]
+        CHART["MRV Time-Series Visualization<br/>(Highcharts + Baselines + Provenance)"]
     end
 
-    subgraph API["Backend (Python FastAPI)"]
-        AUTH["JWT Authentication<br/>(/auth/login, /auth/register)"]
-        PROJ["Project Management<br/>(/projects CRUD)"]
-        GEOM["Geospatial & Validation Service<br/>(Shapely + PostGIS ST_Intersects)"]
-        ANLY["MRV Analytics Service<br/>(Deltas vs Baseline, Ecological Trends)"]
+    subgraph API["Backend Service (Python FastAPI)"]
+        AUTH["JWT Authentication<br/>(OAuth2 Bearer Tokens)"]
+        PROJ["Project & Site Management<br/>(CRUD + GeoJSON FeatureCollections)"]
+        GEOM["Spatial Validation Service<br/>(Shapely + PostGIS ST_Intersects)"]
+        ANLY["MRV Analytics Engine<br/>(Delta calculations vs Baseline)"]
     end
 
-    subgraph DB["Database (PostgreSQL + PostGIS)"]
-        D1[("users")]
-        D2[("projects")]
-        D3[("sites (GEOMETRY POLYGON 4326)")]
-        D4[("monitoring_records (Normalized Time-Series)")]
+    subgraph DB["Database Layer (PostgreSQL + PostGIS)"]
+        T_USERS[("users")]
+        T_PROJ[("projects")]
+        T_SITES[("sites (GEOMETRY POLYGON 4326)")]
+        T_METRICS[("metric_definitions")]
+        T_RECORDS[("monitoring_records (Time-Series)")]
     end
 
-    CLIENT -->|REST API + JWT Bearer| API
-    API --> DB
+    CLIENT -->|REST API + JSON / GeoJSON| API
+    API -->|AsyncPG / SQLAlchemy 2.0| DB
 ```
 
-### Key Architectural Decisions:
+---
 
-- **Design System Match:** Exact colors (`rgb(0, 146, 69)`, `#0B1F16`, `#F3F4F6`) and typography (**Manrope**, **JetBrains Mono**) extracted directly from [darukaa.earth](https://darukaa.earth/).
-- **Decoupled Backend:** Built in Python with **FastAPI** for native geospatial calculation via `shapely` and PostGIS.
-- **Resilient Map Rendering:** Configured with Mapbox GL JS with seamless fallback vector/raster rendering so reviewers can test the application without configuration friction.
+## ✨ Key Features & Rubric Highlights
+
+### 1. Interactive Geospatial Mapping (Mapbox GL JS)
+
+- Visualizes verified carbon and biodiversity sites across Indian ecological regions (Sundarbans Mangroves, Western Ghats Reforestation, Marathwada Agroforestry).
+- Polygon drawing tool with real-time geodesic area calculation using the WGS84 ellipsoid.
+- Switchable basemap modes (High-definition vector terrain and OpenStreetMap raster fallback).
+
+### 2. Double-Counting & Overlap Detection (Key Technical Differentiator)
+
+- In carbon credit markets, registering overlapping boundaries creates fraudulent "double-counted" credits.
+- TerraLedger executes spatial validation before saving parcels:
+  - If an overlap exceeds the **100 m² (0.01 ha)** precision buffer, the system rejects the polygon with an `HTTP 409 Conflict`.
+  - The UI displays an immediate red conflict alert showing the conflicting parcel name and exact overlapping hectares.
+
+### 3. MRV Analytics with Provenance (Highcharts)
+
+- 30-to-36 months of time-series observations tracking restoration progress.
+- Visual **baseline reference line** showing initial degraded conditions.
+- Rich tooltips indicating **Data Provenance**:
+  - `satellite_derived` (Sentinel-2 L2A optical imagery)
+  - `modelled` (Allometric carbon density models)
+  - `field_survey` (On-ground botanical transects)
+- Confidence scores (e.g., `85% confidence`) for complete auditability.
 
 ---
 
-## 2. Core User Stories & Differentiators
+## 🗄️ Database Schema & Data Modeling
 
-| User Story                                        | Implementation & Rubric Differentiator                                                                                                                                                                                                                                    |
-| :------------------------------------------------ | :------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| **1. Create project & add sites**                 | Administrators can create projects (Agroforestry, Reforestation, Mangrove, Soil Carbon) and draw polygon boundaries on the map.                                                                                                                                           |
-| **2. Double-counting prevention (Overlap check)** | **Key Differentiator:** When drawing a parcel, the backend performs a real-time `ST_Intersects` check with a 100 m² (0.01 ha) tolerance threshold. True overlaps are rejected with a `409 Conflict` and highlighted in red on the map, preventing double-counting claims. |
-| **3. Interactive Map View**                       | Renders all portfolio sites across India with calculated hectares and status. Click to open the **Site Detail Drawer**.                                                                                                                                                   |
-| **4. Site Analytics & Historical Trends**         | **Highcharts** time-series line chart displaying ecological metrics over 2.5–3 years against the baseline observation. Includes tooltips with **Data Provenance** (`satellite_derived`, `field_survey`, `modelled`) and confidence scores.                                |
+The relational database is built with **PostgreSQL** and the **PostGIS** spatial extension:
+
+```mermaid
+erDiagram
+    users ||--o{ projects : "creates"
+    projects ||--o{ sites : "contains"
+    sites ||--o{ monitoring_records : "has observations"
+    metric_definitions ||--o{ monitoring_records : "defines"
+
+    users {
+        UUID id PK
+        VARCHAR email UK
+        VARCHAR password_hash
+        VARCHAR full_name
+        VARCHAR role
+    }
+
+    projects {
+        UUID id PK
+        UUID owner_id FK
+        VARCHAR name
+        VARCHAR project_type
+        VARCHAR registry_standard
+        VARCHAR country
+        VARCHAR status
+    }
+
+    sites {
+        UUID id PK
+        UUID project_id FK
+        VARCHAR name
+        GEOMETRY boundary "POLYGON 4326"
+        GEOMETRY centroid "POINT 4326"
+        FLOAT area_hectares
+        DATE baseline_date
+        VARCHAR land_cover_type
+    }
+
+    metric_definitions {
+        VARCHAR id PK
+        VARCHAR label
+        VARCHAR unit
+        VARCHAR category
+        BOOLEAN higher_is_better
+    }
+
+    monitoring_records {
+        UUID id PK
+        UUID site_id FK
+        VARCHAR metric_id FK
+        DATE observed_on
+        FLOAT value
+        VARCHAR provenance
+        VARCHAR source_name
+        FLOAT confidence
+        BOOLEAN is_baseline
+    }
+```
 
 ---
 
-## 3. Database Schema Breakdown
+## 🚀 Quick Start & Local Setup
 
-PostgreSQL with the PostGIS spatial extension:
+### Option A: 1-Click Launch (Recommended)
 
-### `users`
-
-- `id` (UUID PK), `email` (Unique), `password_hash` (Bcrypt), `full_name`, `role` (`admin`, `viewer`).
-
-### `projects`
-
-- `id` (UUID PK), `owner_id` (FK -> users.id), `name`, `description`, `project_type` (`agroforestry`, `reforestation`, `wetland_restoration`), `status`, `registry_standard` (e.g. Verra VM0042, Plan Vivo), `country`.
-
-### `sites`
-
-- `id` (UUID PK), `project_id` (FK -> projects.id), `name`, `boundary` (`GEOMETRY(POLYGON, 4326)`), `area_hectares` (computed geodesic area), `centroid` (`GEOMETRY(POINT, 4326)`), `baseline_date`, `land_cover_type`.
-
-### `metric_definitions`
-
-- `id` (PK, e.g. `canopy_cover`, `ndvi_mean`, `carbon_stock`, `soil_organic_carbon`, `species_richness`), `label`, `unit`, `category`, `higher_is_better`.
-
-### `monitoring_records` (Normalized Time-Series)
-
-- `id` (UUID PK), `site_id` (FK -> sites.id), `metric_id` (FK -> metric_definitions.id), `observed_on` (Date), `value` (Float), `provenance` (`satellite_derived`, `field_survey`, `modelled`), `source_name` (e.g. `Sentinel-2 L2A`), `confidence` (0.0–1.0), `is_baseline` (Boolean).
-
----
-
-## 4. Local Setup & Quick Start
-
-### Prerequisites
-
-- Python >= 3.11 with [`uv`](https://docs.astral.sh/uv/) (or standard `pip`)
-- Node.js >= 20 and `npm`
-
-### Step 1: Clone Repository
+Run the automated launch script from the repository root:
 
 ```bash
-git clone https://github.com/<your-repo>/darukaa-full-stack.git
-cd darukaa-full-stack
+./run.sh
 ```
 
-### Step 2: Install Root & Pre-commit Tooling
+This script will automatically:
 
-```bash
-npm install
-```
+1. Verify/create the local PostgreSQL database `darukaa`.
+2. Run database migrations and seed preloaded Indian projects with 3-year time-series.
+3. Start the FastAPI backend on `http://localhost:8000`.
+4. Launch the Next.js frontend on `http://localhost:3000`.
 
-### Step 3: Backend Setup & Seeding
+---
+
+### Option B: Manual Setup
+
+#### 1. Prerequisites
+
+- **Python:** >= 3.11 with [`uv`](https://docs.astral.sh/uv/) (or standard `pip`)
+- **Node.js:** >= 20.x and `npm`
+- **PostgreSQL:** with PostGIS extension enabled
+
+#### 2. Backend Setup
 
 ```bash
 cd backend
+
+# Install dependencies using uv
 uv sync --all-groups
 
-# Seed preloaded Indian projects, hand-digitized polygons & 3 years of time-series:
+# Seed demo database (admin account + 3 projects + 4 parcels + 180 time-series points)
 uv run python -m app.seed.seed_data
 
-# Start FastAPI server on port 8000:
+# Start development server
 uv run uvicorn app.main:app --reload --port 8000
 ```
 
-- Interactive API Documentation (Swagger): `http://localhost:8000/docs`
+- Swagger API Docs: [http://localhost:8000/docs](http://localhost:8000/docs)
+- Health Check: [http://localhost:8000/health](http://localhost:8000/health)
 
-### Step 4: Frontend Setup
+#### 3. Frontend Setup
 
 ```bash
 cd ../frontend
+
+# Install dependencies
 npm install
+
+# Start Next.js development server
 npm run dev
 ```
 
-- Dashboard URL: `http://localhost:3000`
-
-### Demo Credentials (1-Click Auto-Fill available in UI)
-
-- **Email:** `admin@darukaa.earth`
-- **Password:** `demo1234`
+- Dashboard URL: [http://localhost:3000](http://localhost:3000)
 
 ---
 
-## 5. CI/CD Pipeline & Pre-commit Hooks
+## ⚙️ Environment Variables Reference
 
-### Crucial Requirement: Pre-commit Code Quality Enforcement
+### Backend (`backend/.env`)
 
-Configured using **Husky** (`v9`), **lint-staged** (`v15`), **Prettier**, and **Ruff**:
+```env
+DATABASE_URL=postgresql+asyncpg://postgres:postgres@localhost:5432/darukaa
+SECRET_KEY=darukaa_earth_nature_intelligence_secret_key_2026
+ALGORITHM=HS256
+ACCESS_TOKEN_EXPIRE_MINUTES=1440
+CORS_ORIGINS=["http://localhost:3000","https://terraledger.vercel.app"]
+```
 
-- **Before Every Commit:**
-  - Runs `ruff format` and `ruff check --fix` on all Python files.
-  - Runs `prettier --write` on all TypeScript/JavaScript, JSON, and CSS files.
-  - Commits that introduce unformatted code or lint errors are **automatically blocked**.
-- **Conventional Commits:** Enforced via `commitlint` (e.g. `feat:`, `fix:`, `chore:`).
+### Frontend (`frontend/.env.local`)
 
-### GitHub Actions Workflow (`.github/workflows/ci.yml`)
+```env
+NEXT_PUBLIC_API_URL=http://localhost:8000/api/v1
+NEXT_PUBLIC_MAPBOX_TOKEN=your_mapbox_public_token_here
+```
 
-1. **Backend Job:** Checks formatting with Ruff, runs linter, and executes the Pytest test suite.
-2. **Frontend Job:** Checks code formatting with Prettier and compiles the production Next.js build.
-
----
-
-## 6. Dataset & Mocking Rationale
-
-> _Per assignment instructions: "There are no limitations on datasets and mocks you would want to use in the project, feel free to use any datasets and document why this choice was made."_
-
-- **Geographical Site Boundaries:** Hand-digitized over real degraded agricultural and forest corridors in **Maharashtra (Beed/Osmanabad)**, **Western Ghats (Coorg)**, and **Sundarbans (Gosaba Island)**. Using real coordinates ensures Mapbox displays authentic geography rather than arbitrary polygons.
-- **NDVI & Canopy Cover (Satellite-derived):** Simulated based on empirical Sentinel-2 L2A observations in India, incorporating **monsoon seasonality** (peaking post-monsoon in August–September) and **logistic vegetation recovery curves**.
-- **Carbon Stock (Modelled):** Derived using allometric relationships matching Verra VM0042 standards and clearly flagged with `provenance: modelled` in the UI.
-- **Soil & Species Counts (Field survey):** Simulated field transect sampling with baseline establishment.
+_(For production on Vercel, set `NEXT_PUBLIC_API_URL=https://terraledger-api.onrender.com/api/v1`)_
 
 ---
 
-## 7. Submission Repository Access
+## 🧪 Testing & Code Quality Assurance
 
-Access has been granted to the Darukaa hiring team:
+### Pre-Commit Hooks (Husky + lint-staged)
+
+The repository enforces clean code on every single Git commit:
+
+- **Python Formatting & Linting:** `ruff format` and `ruff check --fix`
+- **Frontend Formatting:** `prettier --write`
+- **Conventional Commits:** Enforced with `commitlint` (e.g., `feat:`, `fix:`, `chore:`)
+
+### Automated Backend Tests (Pytest)
+
+Run the comprehensive unit and integration test suite:
+
+```bash
+cd backend
+uv run pytest -v
+```
+
+All 6 automated unit tests pass:
+
+- Spatial polygon overlap detection tests
+- Shapely geodesic area calculation tests
+- JWT token encryption and password hashing tests
+- Authentication login flow verification
+
+---
+
+## 👥 Reviewer Access & Visibility
+
+This repository is **public**, allowing open and frictionless access for review, cloning, and verification by the Darukaa.Earth evaluation team:
 
 - `ankita.dasgupta@darukaa.com`
 - `harsh.kumar@darukaa.com`
 - `utkarsh.gauniyal@darukaa.com`
 - `guneet.mutreja@darukaa.com`
+
+No private collaborator invitations or access approvals are required to inspect the codebase, run tests, or review deployment pipelines.
+
+---
+
+<div align="center">
+  <sub>Developed by <b>Akash Vishwakarma</b> for the <b>Darukaa.Earth Full-Stack Hackathon</b>.</sub>
+</div>
