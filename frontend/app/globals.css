@@ -1,26 +1,112 @@
 @import "tailwindcss";
+@import "mapbox-gl/dist/mapbox-gl.css";
+@import "@mapbox/mapbox-gl-draw/dist/mapbox-gl-draw.css";
 
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
-}
-
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
-}
-
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+  --darukaa-green: rgb(0, 146, 69);
+  --darukaa-green-dark: #0b1f16;
+  --darukaa-green-accent: #0e2a1d;
+  --darukaa-card: #f3f4f6;
+  --darukaa-border: rgb(0, 146, 69);
+  --darukaa-muted: #6b7280;
 }
 
 body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  font-family:
+    var(--font-manrope),
+    ui-sans-serif,
+    system-ui,
+    -apple-system,
+    sans-serif;
+  background-color: #f9fafb;
+  color: #111827;
+}
+
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+  font-family: var(--font-manrope), ui-sans-serif, system-ui, sans-serif;
+  letter-spacing: -0.02em;
+}
+
+.font-mono {
+  font-family: var(--font-jetbrains-mono), monospace;
+}
+
+/* Darukaa signature buttons & cards */
+.btn-primary {
+  background-color: var(--darukaa-green-dark);
+  color: #ffffff;
+  border: 1px solid var(--darukaa-green);
+  border-radius: 12px;
+  font-weight: 600;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+.btn-primary:hover {
+  background-color: #0e2a1d;
+  border-color: var(--darukaa-green);
+  box-shadow: 0 4px 12px rgba(0, 146, 69, 0.2);
+}
+
+.btn-secondary {
+  background-color: #f3f4f6;
+  color: #0b1f16;
+  border: 1px solid #e5e7eb;
+  border-radius: 12px;
+  font-weight: 500;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+.btn-secondary:hover {
+  border-color: var(--darukaa-green);
+  background-color: #ffffff;
+}
+
+/* Mapbox styling */
+.mapboxgl-popup-content {
+  background-color: #ffffff !important;
+  color: #111827 !important;
+  border: 1.5px solid var(--darukaa-green) !important;
+  border-radius: 12px !important;
+  padding: 12px 16px !important;
+  box-shadow: 0 10px 25px -5px rgba(11, 31, 22, 0.15) !important;
+}
+
+.mapboxgl-popup-tip {
+  border-top-color: var(--darukaa-green) !important;
+}
+
+/* Highcharts custom styling */
+.highcharts-background {
+  fill: transparent !important;
+}
+.highcharts-title {
+  font-family: var(--font-manrope) !important;
+  font-weight: 600 !important;
+  color: #0b1f16 !important;
+}
+.highcharts-axis-labels text {
+  fill: #6b7280 !important;
+  font-size: 11px !important;
+}
+.highcharts-grid-line {
+  stroke: #e5e7eb !important;
+}
+
+/* Smooth sleek scrollbar */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+::-webkit-scrollbar-track {
+  background: #f3f4f6;
+}
+::-webkit-scrollbar-thumb {
+  background: #d1d5db;
+  border-radius: 9999px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: #9ca3af;
 }
