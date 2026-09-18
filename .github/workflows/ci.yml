@@ -1,0 +1,68 @@
+name: CI Pipeline
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  backend-quality-and-tests:
+    name: Backend Lint & Tests
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install uv
+        uses: astral-sh/setup-uv@v3
+        with:
+          enable-cache: true
+
+      - name: Set up Python
+        run: uv python install 3.13
+
+      - name: Install Backend Dependencies
+        working-directory: backend
+        run: uv sync --all-groups
+
+      - name: Check Formatting with Ruff
+        working-directory: backend
+        run: uv run ruff format --check app
+
+      - name: Lint with Ruff
+        working-directory: backend
+        run: uv run ruff check app
+
+      - name: Run Pytest Suite
+        working-directory: backend
+        run: uv run pytest -v
+
+  frontend-quality-and-build:
+    name: Frontend Lint & Build
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Node.js 20
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+
+      - name: Install Monorepo & Frontend Dependencies
+        run: |
+          npm ci
+          cd frontend && npm ci
+
+      - name: Check Prettier Formatting
+        run: npx prettier --check "frontend/**/*.{js,jsx,json,css}"
+
+      - name: Build Next.js Frontend
+        working-directory: frontend
+        run: npm run build
+        env:
+          NEXT_PUBLIC_API_URL: https://darukaa-api.onrender.com/api/v1
